@@ -1,0 +1,6 @@
+# Minimal project dependencies.
+# Install a compatible PyTorch build for your OS/GPU FIRST using the official
+# PyTorch installation instructions, then install these requirements.
+nnunetv2==2.8.1
+SimpleITK>=2.3
+numpy>=1.24
