@@ -1,0 +1,45 @@
+experiment:
+  id: EXP01
+  name: nnU-Net 3D full-resolution baseline
+  status: in_progress
+
+dataset:
+  id: Dataset001_AAA
+  modality: CT
+  subset: contrast-enhanced pre-operative AAA
+  cross_validation_cases: 200
+  test_cases: 20
+
+framework:
+  name: nnU-Net
+  version: 2.8.1
+  configuration: 3d_fullres
+  trainer: nnUNetTrainer
+  plans: nnUNetPlans
+
+cross_validation:
+  folds: 5
+  training_cases_per_fold: 160
+  validation_cases_per_fold: 40
+  split_file: configs/Dataset001_AAA/splits_final.json
+
+training:
+  epochs_per_fold: 1000
+
+folds:
+  fold_0:
+    status: completed
+    mean_validation_dice: 0.9738874870806583
+    mean_validation_iou: 0.9493091209994896
+
+  fold_1:
+    status: pending
+
+  fold_2:
+    status: pending
+
+  fold_3:
+    status: pending
+
+  fold_4:
+    status: pending
