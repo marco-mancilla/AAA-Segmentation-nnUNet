@@ -1,0 +1,14 @@
+# Default text-file handling
+* text=auto
+
+# Cross-platform source and configuration files
+*.py    text eol=lf
+*.sh    text eol=lf
+*.md    text eol=lf
+*.json  text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.csv   text eol=lf
+
+# PowerShell
+*.ps1   text eol=crlf
