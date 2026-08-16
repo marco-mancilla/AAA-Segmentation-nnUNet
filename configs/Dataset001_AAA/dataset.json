@@ -1,0 +1,39 @@
+{
+    "channel_names": {
+        "0": "CT"
+    },
+    "labels": {
+        "background": 0,
+        "AAA": 1
+    },
+    "numTraining": 200,
+    "file_ending": ".nii.gz",
+    "overwrite_image_reader_writer": "SimpleITKIO",
+    "name": "AAA-Segmentation",
+    "description": "Contrast-enhanced CT dataset for abdominal aortic aneurysm segmentation.",
+    "license": "Research use according to dataset license.",
+    "release": "1.0",
+    "reference": "",
+    "test": [
+        "AAA_TEST_001_0000.nii.gz",
+        "AAA_TEST_002_0000.nii.gz",
+        "AAA_TEST_003_0000.nii.gz",
+        "AAA_TEST_004_0000.nii.gz",
+        "AAA_TEST_005_0000.nii.gz",
+        "AAA_TEST_006_0000.nii.gz",
+        "AAA_TEST_007_0000.nii.gz",
+        "AAA_TEST_008_0000.nii.gz",
+        "AAA_TEST_009_0000.nii.gz",
+        "AAA_TEST_010_0000.nii.gz",
+        "AAA_TEST_011_0000.nii.gz",
+        "AAA_TEST_012_0000.nii.gz",
+        "AAA_TEST_013_0000.nii.gz",
+        "AAA_TEST_014_0000.nii.gz",
+        "AAA_TEST_015_0000.nii.gz",
+        "AAA_TEST_016_0000.nii.gz",
+        "AAA_TEST_017_0000.nii.gz",
+        "AAA_TEST_018_0000.nii.gz",
+        "AAA_TEST_019_0000.nii.gz",
+        "AAA_TEST_020_0000.nii.gz"
+    ]
+}
