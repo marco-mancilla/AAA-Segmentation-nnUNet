@@ -216,3 +216,47 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Virtual environments
+AAA-S-EXP01/
+.venv/
+venv/
+env/
+
+# nnU-Net runtime data
+nnUNet_raw/
+nnUNet_preprocessed/
+nnUNet_results/
+
+# Dataset files
+data/raw/
+data/processed/
+data/test_ground_truth/
+
+# Medical images
+*.nii
+*.nii.gz
+*.nrrd
+*.seg.nrrd
+
+# Model weights
+*.pth
+*.pt
+*.ckpt
+
+# Prediction probabilities / temporary outputs
+*.npz
+
+# Large model outputs
+models/
+results/predictions/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment / secrets
+.env
