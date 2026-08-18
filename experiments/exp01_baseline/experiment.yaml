@@ -33,7 +33,9 @@ folds:
     mean_validation_iou: 0.9493091209994896
 
   fold_1:
-    status: pending
+    status: completed
+    mean_validation_dice: 0.9696128137747
+    mean_validation_iou: 0.941358092716049
 
   fold_2:
     status: pending
