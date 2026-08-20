@@ -427,8 +427,24 @@ Large model artifacts can be distributed separately if needed.
 
 ## Licenses and citation
 
-Repository code is released under the license in `LICENSE` (**MIT**).
+Repository code is released under the [MIT License](LICENSE).
 
-The AAA dataset is a third-party dataset and retains its own **CC BY 4.0** license and attribution requirements. Cite the dataset authors and DOI when using it.
+The AAA dataset is a third-party dataset distributed under **CC BY 4.0**.
+Dataset files are not redistributed in this repository and remain subject to
+their original license and attribution requirements.
 
-nnU-Net is developed by the Division of Medical Image Computing at the German Cancer Research Center (DKFZ). Please follow the nnU-Net project citation instructions when publishing results produced with nnU-Net.
+If you use the dataset, please cite:
+
+> Siriapisith, T., Kusakunniran, W., & Haddawy, P.  
+> *A 3D deep learning approach incorporating coordinate information to improve
+> the segmentation of pre- and post-operative abdominal aortic aneurysm.*  
+> Dataset: https://doi.org/10.6084/m9.figshare.19090052
+
+If you use nnU-Net, please cite:
+
+> Isensee, F., Jaeger, P. F., Kohl, S. A. A., Petersen, J., & Maier-Hein, K. H. (2021).  
+> *nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation.*  
+> Nature Methods, 18, 203–211.
+
+nnU-Net is developed by the Division of Medical Image Computing at the
+German Cancer Research Center (DKFZ).
