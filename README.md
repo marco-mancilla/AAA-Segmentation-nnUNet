@@ -1,16 +1,64 @@
 # AAA Segmentation with nnU-Net v2
 
-Reproducible code and experiment metadata for abdominal aortic aneurysm (AAA)
-segmentation in contrast-enhanced CT using **nnU-Net v2**.
+Reproducible code, configuration, experiment metadata, and lightweight results for abdominal aortic aneurysm (AAA) segmentation in contrast-enhanced CT using **nnU-Net v2**.
 
-This repository contains the **code, configuration, and lightweight experiment
-results** required to reproduce the computational workflow. Raw medical images,
-preprocessed nnU-Net data, model checkpoints, and prediction volumes are kept
-outside Git.
+This repository is intentionally separated from the runtime workspace. It contains the files needed to reproduce and audit the computational workflow, while raw medical images, preprocessed nnU-Net data, model checkpoints, and prediction volumes remain outside Git.
 
-> **Research scope:** the baseline experiment (`EXP01`) uses the pre-operative
-> contrast-enhanced (CE) CT subset of the public AAA dataset by Siriapisith,
-> Kusakunniran, and Haddawy.
+> **Research scope — EXP01:** the baseline experiment uses only the **pre-operative contrast-enhanced CT (CECT)** subset of the public AAA dataset by Siriapisith, Kusakunniran, and Haddawy. **Non-contrast CT (NCCT) and post-EVAR data are not included in EXP01.**
+
+---
+
+## Current EXP01 status
+
+`EXP01` is a five-fold cross-validation baseline using the standard `3d_fullres` nnU-Net configuration.
+
+| Fold | Status | Mean validation Dice | Mean validation IoU |
+|---|---|---:|---:|
+| 0 | Completed | 0.9738874871 | 0.9493091210 |
+| 1 | Completed | 0.9696128138 | 0.9413580927 |
+| 2 | In Progress | — | — |
+| 3 | Pending | — | — |
+| 4 | Pending | — | — |
+
+**Out-of-fold validation completed:** 80 / 200 cases (**40%**).
+
+Fold 2 has been verified with the reproducible training launcher's `--dry-run` mode and has not yet been included in the results above.
+
+Per-case metrics currently available:
+
+```text
+results/metrics/fold_0_metrics.csv
+results/metrics/fold_1_metrics.csv
+```
+
+The experiment remains **in progress** until all five folds are trained and validated.
+
+---
+
+## Reference environment
+
+The reference `EXP01` run uses:
+
+| Component | Reference |
+|---|---|
+| Python | 3.10 |
+| nnU-Net | **v2.8.1** |
+| PyTorch | 2.13.0+cu130 |
+| CUDA reported by PyTorch | 13.0 |
+| Reference GPU | NVIDIA GeForce RTX 5060 Ti |
+| nnU-Net configuration | `3d_fullres` |
+| Trainer | `nnUNetTrainer` |
+| Plans | `nnUNetPlans` |
+| Cross-validation | 5 folds |
+| Training cases per fold | 160 |
+| Validation cases per fold | 40 |
+| Epochs per fold | 1000 |
+
+The GPU and CUDA entries describe the **reference machine**, not a requirement for every compatible installation.
+
+Portable dependencies are listed in `environment/requirements.txt`, while the reference environment snapshot is preserved in `environment/requirements-lock.txt`.
+
+---
 
 ## Repository layout
 
@@ -19,6 +67,7 @@ AAA-Segmentation-nnUNet/
 ├── README.md
 ├── LICENSE
 ├── .gitignore
+├── .gitattributes
 ├── configs/
 │   └── Dataset001_AAA/
 │       ├── dataset.json
@@ -30,19 +79,26 @@ AAA-Segmentation-nnUNet/
 │   ├── requirements.txt
 │   └── requirements-lock.txt
 ├── data/
-│   └── .gitkeep
+│   └── README.md
 ├── scripts/
 │   ├── setup_workspace.py
 │   ├── data/
 │   │   ├── inspect_aaa.py
 │   │   └── prepare_aaa_dataset.py
 │   ├── training/
+│   │   └── train.py
 │   ├── evaluation/
+│   │   └── export_fold_metrics.py
 │   └── inference/
 ├── experiments/
 │   └── exp01_baseline/
+│       ├── experiment.yaml
+│       ├── commands.ps1
+│       └── commands.sh
 ├── results/
 │   ├── metrics/
+│   │   ├── fold_0_metrics.csv
+│   │   └── fold_1_metrics.csv
 │   └── tables/
 ├── figures/
 │   └── diagnostics/
@@ -66,8 +122,7 @@ parent-directory/
     └── logs/
 ```
 
-This design minimizes the risk of accidentally committing medical images,
-large preprocessed files, predictions, or model weights.
+This separation minimizes the risk of accidentally committing medical images, large preprocessed data, predictions, checkpoints, or machine-specific files.
 
 ---
 
@@ -78,23 +133,19 @@ git clone <YOUR-REPOSITORY-URL>
 cd AAA-Segmentation-nnUNet
 ```
 
-Python **3.10 or newer** is recommended by current nnU-Net documentation.
+Python 3.10 is used by the reference experiment.
 
 ---
 
 ## 2. Create the workspace and virtual environment
 
-The same Python setup script works on Windows and Linux:
+The same setup helper works on Windows and Linux:
 
 ```bash
 python scripts/setup_workspace.py
 ```
 
-By default it creates:
-
-```text
-../AAA-Segmentation-workspace
-```
+By default, it creates `../AAA-Segmentation-workspace`.
 
 To choose another location:
 
@@ -102,31 +153,19 @@ To choose another location:
 python scripts/setup_workspace.py --workspace /path/to/AAA-Segmentation-workspace
 ```
 
-### Windows PowerShell
+The setup creates the runtime workspace, virtual environment, nnU-Net directory structure, activation helpers, and workspace metadata.
 
-Activate the virtual environment:
+### Windows PowerShell
 
 ```powershell
 & "..\AAA-Segmentation-workspace\.venv\Scripts\Activate.ps1"
-```
-
-Load the nnU-Net environment variables:
-
-```powershell
 . "..\AAA-Segmentation-workspace\activate_nnunet.ps1"
 ```
 
 ### Linux
 
-Activate the virtual environment:
-
 ```bash
 source ../AAA-Segmentation-workspace/.venv/bin/activate
-```
-
-Load the nnU-Net environment variables:
-
-```bash
 source ../AAA-Segmentation-workspace/activate_nnunet.sh
 ```
 
@@ -140,7 +179,7 @@ The helper defines the three paths required by nnU-Net:
 
 ## 3. Install PyTorch and project dependencies
 
-Install a PyTorch build appropriate for your operating system and GPU first:
+Install a PyTorch build appropriate for the operating system, GPU, driver, and CUDA environment first:
 
 https://pytorch.org/get-started/locally/
 
@@ -150,21 +189,19 @@ Then install the project dependencies:
 python -m pip install -r environment/requirements.txt
 ```
 
-The environment used for the reference experiment is recorded in:
-
-```text
-environment/requirements-lock.txt
-```
-
-The lock file is provided for provenance. A byte-for-byte identical Python
-environment may not be portable across operating systems or GPU/CUDA versions,
-so use it as a reference rather than blindly installing it on every platform.
-
 Verify the installation:
 
 ```bash
 python -c "import torch, nnunetv2, SimpleITK; print('torch:', torch.__version__); print('CUDA:', torch.cuda.is_available())"
 ```
+
+To confirm the installed nnU-Net package version:
+
+```bash
+python -m pip show nnunetv2
+```
+
+The reference experiment was performed with **nnU-Net v2.8.1**.
 
 ---
 
@@ -173,58 +210,30 @@ python -c "import torch, nnunetv2, SimpleITK; print('torch:', torch.__version__)
 Dataset:
 
 **Thanongchai Siriapisith, Worapan Kusakunniran, Peter Haddawy.  
-“A 3D deep learning approach incorporating coordinate information to improve
-the segmentation of pre- and post-operative abdominal aortic aneurysm.”**
+“A 3D deep learning approach incorporating coordinate information to improve the segmentation of pre- and post-operative abdominal aortic aneurysm.”**
 
 DOI:
 
 https://doi.org/10.6084/m9.figshare.19090052
 
-Figshare reports the following relevant pre-operative subsets:
+`EXP01` intentionally selects only the **pre-operative contrast-enhanced CT** subset:
 
-- Contrast-enhanced CT: 200 training cases
-- Contrast-enhanced CT: 20 test cases
-- Non-contrast CT: 200 training cases
-- Non-contrast CT: 20 test cases
+- 200 CE training/cross-validation cases;
+- 20 CE test cases.
 
-`EXP01` uses **only the pre-operative contrast-enhanced CT subset**.
+Although the source dataset also provides other data, including non-contrast and post-operative material, those images are **outside the scope of EXP01**.
 
-The dataset is distributed by its authors under **CC BY 4.0**. The MIT license
-in this repository applies to repository code, not to third-party dataset files.
+The dataset is distributed by its authors under **CC BY 4.0**. The MIT license in this repository applies to repository code, not to third-party dataset files.
 
-Download and extract the dataset somewhere outside Git, for example:
+### Case-level interpretation
 
-```text
-AAA-Segmentation-workspace/
-└── data/
-    └── source/
-        └── AAA_dataset/
-            ├── AAA_Train/
-            │   ├── CE001_CE.nrrd
-            │   ├── CE001_gt-label.nrrd
-            │   └── ...
-            └── AAA_Test/
-                ├── CE021_CE.nrrd
-                ├── CE021_gt-label.nrrd
-                └── ...
-```
-
-The preparation script can also receive a parent directory and will locate a
-single nested directory containing both `AAA_Train` and `AAA_Test`.
+Within this repository, each CT volume is handled as an individual **case**. The current computational pipeline does not use patient identifiers, study dates, or longitudinal links. Therefore, repository documentation should not infer patient-level uniqueness or longitudinal follow-up unless that relation is explicitly established from the source dataset metadata.
 
 ---
 
 ## 5. Inspect a source image/label pair
 
-`inspect_aaa.py` is a lightweight sanity checker. It reports:
-
-- image and label dimensions;
-- voxel spacing;
-- origin and direction;
-- NumPy array shape;
-- CT intensity statistics;
-- segmentation labels and voxel counts;
-- whether image/label geometry matches.
+`scripts/data/inspect_aaa.py` reports image/label dimensions, voxel spacing, origin/direction, CT intensity statistics, segmentation labels, voxel counts, and geometry consistency.
 
 Example:
 
@@ -234,19 +243,11 @@ python scripts/data/inspect_aaa.py \
   --label "../AAA-Segmentation-workspace/data/source/AAA_dataset/AAA_Train/CE001_gt-label.nrrd"
 ```
 
-On Windows PowerShell the same command can be written on one line:
-
-```powershell
-python .\scripts\data\inspect_aaa.py --image "..\AAA-Segmentation-workspace\data\source\AAA_dataset\AAA_Train\CE001_CE.nrrd" --label "..\AAA-Segmentation-workspace\data\source\AAA_dataset\AAA_Train\CE001_gt-label.nrrd"
-```
-
 A valid binary segmentation is expected to contain labels `0` and `1`.
 
 ---
 
 ## 6. Prepare `Dataset001_AAA`
-
-Run:
 
 ### Windows PowerShell
 
@@ -264,95 +265,56 @@ python scripts/data/prepare_aaa_dataset.py \
   --workspace ../AAA-Segmentation-workspace
 ```
 
-The script:
-
-1. selects only files matching `CE*_CE.nrrd`;
-2. requires the corresponding `CE###_gt-label.nrrd`;
-3. validates image/label geometry;
-4. verifies binary labels `{0, 1}` and non-empty foreground;
-5. converts NRRD to compressed NIfTI using SimpleITK;
-6. maps source training cases to `AAA_001` … `AAA_200`;
-7. maps source test cases to `AAA_TEST_001` … `AAA_TEST_020`;
-8. creates the nnU-Net v2 `dataset.json`;
-9. stores test reference masks outside `labelsTr`;
-10. writes a case mapping and preparation report under `workspace/data/reports/`.
-
-Generated nnU-Net structure:
-
-```text
-nnUNet_raw/
-└── Dataset001_AAA/
-    ├── imagesTr/
-    │   ├── AAA_001_0000.nii.gz
-    │   └── ...
-    ├── labelsTr/
-    │   ├── AAA_001.nii.gz
-    │   └── ...
-    ├── imagesTs/
-    │   ├── AAA_TEST_001_0000.nii.gz
-    │   └── ...
-    └── dataset.json
-```
-
-Test references are kept separately:
-
-```text
-data/test_ground_truth/
-├── AAA_TEST_001.nii.gz
-└── ...
-```
+The preparation script selects the CE subset, validates image/label geometry, verifies binary labels, converts NRRD to compressed NIfTI, creates nnU-Net IDs, generates `dataset.json`, keeps test references outside `labelsTr`, and writes mapping/report files.
 
 ### Source-ID overlap safeguard
 
-The downloaded dataset uses some CE identifiers in both `AAA_Train` and
-`AAA_Test`. Identifier equality alone does not establish whether two files are
-the same study. The preparation script therefore checks overlapping IDs using
-both file SHA-256 and voxel+geometry hashes.
+Some CE identifiers occur in both `AAA_Train` and `AAA_Test`. Identifier equality alone does not establish whether two files represent the same study or patient.
 
-If identical image or label content is detected across train/test, preparation
-stops by default so the potential leakage can be investigated before reporting
-a held-out test result.
+The preparation pipeline compares overlapping source IDs using file SHA-256 hashes and voxel+geometry hashes for both images and labels. For the currently prepared CE subset, no byte-identical or voxel+geometry-identical volumes were detected among the overlapping source identifiers.
+
+This check does **not** establish patient-level independence.
 
 ---
 
 ## 7. Plan and preprocess with nnU-Net
 
-After loading the nnU-Net environment variables:
-
 ```bash
 nnUNetv2_plan_and_preprocess -d 1 --verify_dataset_integrity
 ```
 
-The reference experiment uses:
+Reference configuration:
 
 ```text
-Dataset001_AAA
-configuration: 3d_fullres
-trainer: nnUNetTrainer
-plans: nnUNetPlans
+Dataset:       Dataset001_AAA
+Configuration: 3d_fullres
+Trainer:       nnUNetTrainer
+Plans:         nnUNetPlans
+Batch size:    2
+Patch size:    [224, 56, 192]
 ```
 
-The generated planning/fingerprint files from the reference run are preserved
-under `configs/Dataset001_AAA/` for auditability.
+The complete generated planning/fingerprint files are preserved under `configs/Dataset001_AAA/` and should be treated as the authoritative configuration record.
 
 ---
 
 ## 8. Reproduce the exact 5-fold split
 
-The exact cross-validation split used by `EXP01` is version-controlled at:
+The exact split used by `EXP01` is version-controlled at:
 
 ```text
 configs/Dataset001_AAA/splits_final.json
 ```
 
-After planning/preprocessing, copy it into the preprocessed dataset with the
-cross-platform helper:
+Each fold contains 160 training and 40 validation cases. Across all five folds, each of the 200 cross-validation cases is used once as an out-of-fold validation case.
+
+Synchronize the split into the preprocessed workspace:
 
 ```bash
 python scripts/setup_workspace.py --sync-splits
 ```
 
-If you used a custom workspace:
+For a custom workspace:
 
 ```bash
 python scripts/setup_workspace.py \
@@ -360,44 +322,81 @@ python scripts/setup_workspace.py \
   --sync-splits
 ```
 
-This step must be completed **before starting training** if exact fold
-membership is required.
+---
+
+## 9. Train the folds reproducibly
+
+Preferred interface:
+
+```bash
+python scripts/training/train.py --fold <FOLD>
+```
+
+Example:
+
+```bash
+python scripts/training/train.py --fold 2
+```
+
+Before delegating to `nnUNetv2_train`, the launcher verifies the nnU-Net executable, required environment variables, preprocessed dataset, `splits_final.json`, equality between workspace and version-controlled splits, and the requested fold.
+
+### Dry run
+
+```bash
+python scripts/training/train.py --fold 2 --dry-run
+```
+
+### Resume an interrupted fold
+
+```bash
+python scripts/training/train.py --fold <FOLD> --resume
+```
+
+Equivalent direct nnU-Net command:
+
+```bash
+nnUNetv2_train Dataset001_AAA 3d_fullres <FOLD>
+```
+
+`EXP01` keeps the same dataset, split definition, trainer, plans, and configuration across all five folds.
 
 ---
 
-## 9. Train the five folds
+## 10. Export per-case validation metrics
+
+After a fold completes:
 
 ```bash
-nnUNetv2_train Dataset001_AAA 3d_fullres 0
-nnUNetv2_train Dataset001_AAA 3d_fullres 1
-nnUNetv2_train Dataset001_AAA 3d_fullres 2
-nnUNetv2_train Dataset001_AAA 3d_fullres 3
-nnUNetv2_train Dataset001_AAA 3d_fullres 4
+python scripts/evaluation/export_fold_metrics.py --fold <FOLD>
 ```
 
-If a run is interrupted, nnU-Net can continue from its latest saved checkpoint:
+Example:
 
 ```bash
-nnUNetv2_train Dataset001_AAA 3d_fullres <FOLD> --c
+python scripts/evaluation/export_fold_metrics.py --fold 1
 ```
 
-### Reference EXP01 status
-
-At the time this README section was written:
-
-| Fold | Status | Mean validation Dice | Mean validation IoU |
-|---|---|---:|---:|
-| 0 | Completed | 0.9738874871 | 0.9493091210 |
-| 1 | Pending | — | — |
-| 2 | Pending | — | — |
-| 3 | Pending | — | — |
-| 4 | Pending | — | — |
-
-Per-case Fold 0 metrics are available at:
+The exporter reads the fold validation `summary.json` and writes:
 
 ```text
-results/metrics/fold_0_metrics.csv
+results/metrics/fold_<N>_metrics.csv
 ```
+
+The exported table contains case ID, fold, Dice, IoU, precision, recall, TP, FP, FN, TN, predicted/reference foreground voxel counts, volume difference, and percentage volume difference.
+
+It also prints fold-level descriptive statistics and the lowest-Dice cases for quick inspection.
+
+The final cross-validation analysis will consolidate the five fold CSV files into a 200-case out-of-fold result set.
+
+---
+
+## 11. Evaluation strategy
+
+Dice is treated as a segmentation overlap metric, not as clinical accuracy.
+
+The planned analysis extends beyond mean Dice to include case-level Dice/IoU, false-positive and false-negative burden, predicted-vs-reference volume differences, surface/distance metrics such as HD95 and ASD/ASSD, spatial inspection, and characterization of oversegmentation, undersegmentation, fragmentation, false positives, false negatives, and boundary errors.
+
+A later stage will examine the possible effect of segmentation errors on geometric or clinically relevant measurements using a separately defined reproducible measurement methodology.
 
 ---
 
@@ -407,10 +406,10 @@ The Git repository should contain:
 
 - source code;
 - small configuration files;
-- exact CV splits;
+- exact cross-validation splits;
 - experiment metadata;
-- lightweight metrics/tables;
-- instructions required to reconstruct the workflow.
+- lightweight metrics and tables;
+- documentation required to reconstruct the workflow.
 
 The Git repository should **not** contain:
 
@@ -418,6 +417,7 @@ The Git repository should **not** contain:
 - generated `nnUNet_raw`, `nnUNet_preprocessed`, or `nnUNet_results` trees;
 - NIfTI/NRRD prediction volumes;
 - model checkpoints (`.pth`, `.pt`, `.ckpt`);
+- probability archives such as `.npz`;
 - local virtual environments;
 - secrets or machine-specific environment files.
 
@@ -427,12 +427,8 @@ Large model artifacts can be distributed separately if needed.
 
 ## Licenses and citation
 
-Repository code is released under the license in `LICENSE` (MIT).
+Repository code is released under the license in `LICENSE` (**MIT**).
 
-The AAA dataset is a third-party dataset and retains its own **CC BY 4.0**
-license and attribution requirements. Cite the dataset authors and DOI when
-using it.
+The AAA dataset is a third-party dataset and retains its own **CC BY 4.0** license and attribution requirements. Cite the dataset authors and DOI when using it.
 
-nnU-Net is developed by the Division of Medical Image Computing at the German
-Cancer Research Center (DKFZ). Please follow the nnU-Net project citation
-instructions when publishing results produced with nnU-Net.
+nnU-Net is developed by the Division of Medical Image Computing at the German Cancer Research Center (DKFZ). Please follow the nnU-Net project citation instructions when publishing results produced with nnU-Net.
