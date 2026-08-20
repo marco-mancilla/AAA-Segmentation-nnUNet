@@ -3,7 +3,8 @@
 Cross-platform training launcher for AAA-Segmentation-nnUNet.
 
 Validates the local nnU-Net environment and exact cross-validation split
-before delegating training to nnUNetv2_train.
+before delegating training to the nnU-Net Python module installed in the
+currently active environment.
 
 Examples:
     python scripts/training/train.py --fold 1
@@ -14,17 +15,18 @@ Examples:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
-import shutil
 import subprocess
 import sys
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-
 
 DEFAULT_DATASET = "Dataset001_AAA"
 DEFAULT_CONFIGURATION = "3d_fullres"
 VALID_FOLDS = (0, 1, 2, 3, 4)
+NNUNET_TRAIN_MODULE = "nnunetv2.run.run_training"
 
 
 def repo_root() -> Path:
@@ -74,7 +76,6 @@ def validate_exact_split(dataset: str, preprocessed_root: Path) -> Path:
             f"Workspace:  {workspace_split}\n\n"
             "Training was stopped to avoid silently using different fold membership."
         )
-
     return workspace_split
 
 
@@ -86,6 +87,23 @@ def validate_dataset(dataset: str, preprocessed_root: Path) -> Path:
             "Run nnUNetv2_plan_and_preprocess before training."
         )
     return dataset_dir
+
+
+def validate_nnunet_installation() -> str:
+    if importlib.util.find_spec(NNUNET_TRAIN_MODULE) is None:
+        raise RuntimeError(
+            f"Python module '{NNUNET_TRAIN_MODULE}' was not found.\n"
+            f"Active interpreter:\n  {sys.executable}\n\n"
+            "Activate the Python environment where nnU-Net v2 is installed."
+        )
+    try:
+        return version("nnunetv2")
+    except PackageNotFoundError:
+        return "unknown"
+
+
+def quote_command(command: list[str]) -> str:
+    return " ".join(f'"{x}"' if any(c.isspace() for c in x) else x for x in command)
 
 
 def parse_args() -> argparse.Namespace:
@@ -112,7 +130,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--resume",
         action="store_true",
-        help="Resume from the latest checkpoint by passing --c to nnUNetv2_train.",
+        help="Resume from the latest checkpoint by passing --c to nnU-Net.",
     )
     parser.add_argument(
         "--dry-run",
@@ -124,13 +142,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-
-    trainer_exe = shutil.which("nnUNetv2_train")
-    if trainer_exe is None:
-        raise RuntimeError(
-            "nnUNetv2_train was not found on PATH.\n"
-            "Activate the Python environment where nnU-Net v2 is installed."
-        )
+    nnunet_version = validate_nnunet_installation()
 
     nnunet_raw = require_env_path("nnUNet_raw")
     nnunet_preprocessed = require_env_path("nnUNet_preprocessed")
@@ -139,8 +151,13 @@ def main() -> int:
     dataset_dir = validate_dataset(args.dataset, nnunet_preprocessed)
     split_path = validate_exact_split(args.dataset, nnunet_preprocessed)
 
+    # Use the active Python interpreter instead of the generated
+    # nnUNetv2_train(.exe) console launcher. This avoids Windows Application
+    # Control blocking the generated executable and makes the environment explicit.
     command = [
-        trainer_exe,
+        sys.executable,
+        "-m",
+        NNUNET_TRAIN_MODULE,
         args.dataset,
         args.configuration,
         str(args.fold),
@@ -155,15 +172,17 @@ def main() -> int:
     print(f"Configuration:       {args.configuration}")
     print(f"Fold:                {args.fold}")
     print(f"Resume:              {args.resume}")
+    print(f"Python:              {sys.executable}")
+    print(f"nnU-Net version:     {nnunet_version}")
+    print(f"Training module:     {NNUNET_TRAIN_MODULE}")
     print(f"nnUNet_raw:          {nnunet_raw}")
     print(f"nnUNet_preprocessed: {nnunet_preprocessed}")
     print(f"nnUNet_results:      {nnunet_results}")
     print(f"Dataset dir:         {dataset_dir}")
     print(f"Verified split:      {split_path}")
-    print(f"Trainer:             {trainer_exe}")
     print()
     print("Command:")
-    print("  " + " ".join(f'"{x}"' if " " in x else x for x in command))
+    print("  " + quote_command(command))
 
     if args.dry_run:
         print()
