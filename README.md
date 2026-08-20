@@ -45,7 +45,7 @@ The reference `EXP01` run uses:
 | nnU-Net | **v2.8.1** |
 | PyTorch | 2.13.0+cu130 |
 | CUDA reported by PyTorch | 13.0 |
-| Reference GPU | NVIDIA GeForce RTX 5060 Ti |
+| Reference GPU | NVIDIA GeForce RTX 5060 Ti 16GB |
 | nnU-Net configuration | `3d_fullres` |
 | Trainer | `nnUNetTrainer` |
 | Plans | `nnUNetPlans` |
