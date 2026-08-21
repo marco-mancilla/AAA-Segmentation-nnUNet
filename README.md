@@ -16,11 +16,11 @@ This repository is intentionally separated from the runtime workspace. It contai
 |---|---|---:|---:|
 | 0 | Completed | 0.9738874871 | 0.9493091210 |
 | 1 | Completed | 0.9696128138 | 0.9413580927 |
-| 2 | In Progress | — | — |
-| 3 | Pending | — | — |
+| 2 | Completed | 0.9767462827 | 0.9546255451 |
+| 3 | In Progres | — | — |
 | 4 | Pending | — | — |
 
-**Out-of-fold validation completed:** 80 / 200 cases (**40%**).
+**Out-of-fold validation completed:** 120 / 200 cases (**60%**).
 
 Fold 2 has been verified with the reproducible training launcher's `--dry-run` mode and has not yet been included in the results above.
 
