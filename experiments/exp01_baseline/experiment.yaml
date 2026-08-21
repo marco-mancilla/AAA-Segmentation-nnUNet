@@ -38,10 +38,12 @@ folds:
     mean_validation_iou: 0.941358092716049
 
   fold_2:
-    status: pending
+    status: completed
+    mean_validation_dice: 0.9767462827422053
+    mean_validation_iou: 0.95462554511277
 
   fold_3:
-    status: pending
+    status: in progress
 
   fold_4:
     status: pending
