@@ -17,19 +17,20 @@ This repository is intentionally separated from the runtime workspace. It contai
 | 0 | Completed | 0.9738874871 | 0.9493091210 |
 | 1 | Completed | 0.9696128138 | 0.9413580927 |
 | 2 | Completed | 0.9767462827 | 0.9546255451 |
-| 3 | In Progres | — | — |
-| 4 | Pending | — | — |
+| 3 | Completed | 0.9746482835 | 0.9506707151 |
+| 4 | In Progress | — | — |
 
-**Out-of-fold validation completed:** 120 / 200 cases (**60%**).
+**Out-of-fold validation completed:** 160 / 200 cases (**80%**).
 
-Fold 2 has been verified with the reproducible training launcher's `--dry-run` mode and has not yet been included in the results above.
+Four of the five cross-validation folds have completed training and final validation. Fold 4 remains pending.
 
 Per-case metrics currently available:
 
 ```text
 results/metrics/fold_0_metrics.csv
 results/metrics/fold_1_metrics.csv
-```
+results/metrics/fold_2_metrics.csv
+results/metrics/fold_3_metrics.csv
 
 The experiment remains **in progress** until all five folds are trained and validated.
 
@@ -98,7 +99,9 @@ AAA-Segmentation-nnUNet/
 ├── results/
 │   ├── metrics/
 │   │   ├── fold_0_metrics.csv
-│   │   └── fold_1_metrics.csv
+│   │   ├── fold_1_metrics.csv
+│   │   ├── fold_2_metrics.csv
+│   │   └── fold_3_metrics.csv
 │   └── tables/
 ├── figures/
 │   └── diagnostics/
