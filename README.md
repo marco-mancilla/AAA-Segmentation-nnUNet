@@ -22,7 +22,7 @@ This repository is intentionally separated from the runtime workspace. It contai
 
 **Out-of-fold validation completed:** 160 / 200 cases (**80%**).
 
-Four of the five cross-validation folds have completed training and final validation. Fold 4 remains pending.
+Four of the five cross-validation folds have completed training and final validation. **Fold 4 is currently in progress.**
 
 Per-case metrics currently available:
 
@@ -31,6 +31,7 @@ results/metrics/fold_0_metrics.csv
 results/metrics/fold_1_metrics.csv
 results/metrics/fold_2_metrics.csv
 results/metrics/fold_3_metrics.csv
+```
 
 The experiment remains **in progress** until all five folds are trained and validated.
 
@@ -46,7 +47,7 @@ The reference `EXP01` run uses:
 | nnU-Net | **v2.8.1** |
 | PyTorch | 2.13.0+cu130 |
 | CUDA reported by PyTorch | 13.0 |
-| Reference GPU | NVIDIA GeForce RTX 5060 Ti 16GB |
+| Reference GPU | NVIDIA GeForce RTX 5060 TI 16 GB |
 | nnU-Net configuration | `3d_fullres` |
 | Trainer | `nnUNetTrainer` |
 | Plans | `nnUNetPlans` |
