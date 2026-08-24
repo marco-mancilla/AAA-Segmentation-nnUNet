@@ -18,11 +18,11 @@ This repository is intentionally separated from the runtime workspace. It contai
 | 1 | Completed | 0.9696128138 | 0.9413580927 |
 | 2 | Completed | 0.9767462827 | 0.9546255451 |
 | 3 | Completed | 0.9746482835 | 0.9506707151 |
-| 4 | In Progress | — | — |
+| 4 | Completed | 0.9739619610 | 0.9495494120 |
 
-**Out-of-fold validation completed:** 160 / 200 cases (**80%**).
+**Out-of-fold validation completed:** 200 / 200 cases (**100%**).
 
-Four of the five cross-validation folds have completed training and final validation. **Fold 4 is currently in progress.**
+All five cross-validation folds have completed training and final validation. Each of the 200 cross-validation cases has therefore been evaluated once as an out-of-fold validation case by a model that did not use that case for training.
 
 Per-case metrics currently available:
 
@@ -31,9 +31,10 @@ results/metrics/fold_0_metrics.csv
 results/metrics/fold_1_metrics.csv
 results/metrics/fold_2_metrics.csv
 results/metrics/fold_3_metrics.csv
+results/metrics/fold_4_metrics.csv
 ```
 
-The experiment remains **in progress** until all five folds are trained and validated.
+The five-fold cross-validation stage of `EXP01` is complete. Further analysis will consolidate the 200 out-of-fold results and extend the evaluation beyond overlap metrics.
 
 ---
 
@@ -102,7 +103,8 @@ AAA-Segmentation-nnUNet/
 │   │   ├── fold_0_metrics.csv
 │   │   ├── fold_1_metrics.csv
 │   │   ├── fold_2_metrics.csv
-│   │   └── fold_3_metrics.csv
+│   │   ├── fold_3_metrics.csv
+│   │   └── fold_4_metrics.csv
 │   └── tables/
 ├── figures/
 │   └── diagnostics/
