@@ -36,6 +36,22 @@ results/metrics/fold_4_metrics.csv
 
 The five-fold cross-validation stage of `EXP01` is complete. Further analysis will consolidate the 200 out-of-fold results and extend the evaluation beyond overlap metrics.
 
+### Complete cross-validation result
+
+The five-fold out-of-fold evaluation covers all **200/200 cases (100%)**.
+
+| Metric | Mean | Median | SD | Minimum | Maximum |
+|---|---:|---:|---:|---:|---:|
+| Dice | 0.9737713656 | 0.9765188599 | 0.0110437081 | 0.9133852911 | 0.9893980449 |
+| IoU | 0.9491025772 | 0.9541151484 | 0.0204693108 | 0.8405788029 | 0.9790185343 |
+
+The aggregate statistics are computed directly from the 200 unique
+out-of-fold predictions stored in:
+
+```text
+results/metrics/exp01_oof_metrics.csv
+```
+
 ---
 
 ## Reference environment
