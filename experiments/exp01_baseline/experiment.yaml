@@ -1,7 +1,7 @@
 experiment:
   id: EXP01
   name: nnU-Net 3D full-resolution baseline
-  status: in_progress
+  status: completed
 
 dataset:
   id: Dataset001_AAA
@@ -48,4 +48,6 @@ folds:
     mean_validation_iou: 0.950670715111456
 
   fold_4:
-    status: pending
+    status: completed
+    mean_validation_dice: 0.9739619610238712
+    mean_validation_iou: 0.949549411982628
