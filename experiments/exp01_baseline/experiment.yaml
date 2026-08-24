@@ -18,10 +18,16 @@ framework:
   plans: nnUNetPlans
 
 cross_validation:
+  status: completed
   folds: 5
-  training_cases_per_fold: 160
-  validation_cases_per_fold: 40
-  split_file: configs/Dataset001_AAA/splits_final.json
+  cases: 200
+  oof_coverage: 200
+  mean_dice: 0.9737713656
+  median_dice: 0.9765188599
+  sd_dice: 0.0110437081
+  mean_iou: 0.9491025772
+  median_iou: 0.9541151484
+  sd_iou: 0.0204693108
 
 training:
   epochs_per_fold: 1000
